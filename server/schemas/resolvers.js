@@ -7,6 +7,12 @@ const resolvers = {
       return matchedUser;
     },
   },
+  Mutation: {
+    createUser: async (parent, { username, email, password }) => {
+      const createdUser = await User.create({ username, email, password });
+      return createdUser;
+    },
+  },
 };
 
 module.exports = resolvers;
