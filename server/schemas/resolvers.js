@@ -1,4 +1,5 @@
-const { User } = require("../models");
+const { User, bookSchema } = require("../models");
+const { signToken } = require("../utils/auth");
 
 const resolvers = {
   Query: {
@@ -10,7 +11,8 @@ const resolvers = {
   Mutation: {
     createUser: async (parent, { username, email, password }) => {
       const createdUser = await User.create({ username, email, password });
-      return createdUser;
+      const token = signToken(createdUser);
+      return { token, createdUser };
     },
   },
 };
