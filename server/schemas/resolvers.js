@@ -1,4 +1,4 @@
-const { User, bookSchema } = require("../models");
+const { User } = require("../models");
 const { signToken } = require("../utils/auth");
 
 const resolvers = {
@@ -14,6 +14,19 @@ const resolvers = {
       const token = signToken(createdUser);
       return { token, createdUser };
     },
+    login: async (parent, { email, password }) => {
+      const loginUser = await User.findOne({ email });
+      const token = signToken(loginUser);
+      return { token, loginUser};
+    },
+    saveBook: async (parent, { books }, context) => {
+      const userBook = await User.findOneAndUpdate({ _id: context.user._id }, {$addToSet: { savedBooks: books }}, { new: true });
+      return userBook;
+    },
+    removeBook: async (parent, { bookId }, context) => {
+      const removedBook = await User.findOneAndUpdate({ _id: context.user._id}, {$pull: { books: { bookId }}}, { new: true });
+      return removedBook;
+    }
   },
 };
 
