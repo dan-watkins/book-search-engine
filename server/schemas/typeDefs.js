@@ -17,6 +17,15 @@ type bookSchema {
     title: String!
 }
 
+input BookInput {
+    bookId: String!
+    authors: [String]
+    description: String
+    image: String
+    link: String
+    title: String
+}
+
 type Auth {
     token: ID!
     user: User
