@@ -4,11 +4,12 @@ const { signToken, AuthenticationError } = require("../utils/auth");
 const resolvers = {
   // Include CONTEXT for the me query //
   Query: {
-    me: async (parent, args) => {
-      const matchedUser = await User.findById(args.meId).select(
-        "-__v -password"
-      );
-      return matchedUser;
+    me: async (parent, args, context) => {
+      if (!context.user) {
+        throw new AuthenticationError();
+      }
+
+      return await User.findById(context.user._id);
     },
     user: async (parent, args) => {
       const allUsers = await User.find();
@@ -16,15 +17,28 @@ const resolvers = {
     },
   },
   Mutation: {
-    createUser: async (parent, { username, email, password }) => {
-      const createdUser = await User.create({ username, email, password });
-      const token = signToken(createdUser);
-      return { token, createdUser };
+    createUser: async (parent, args) => {
+      const user = await User.create(args);
+      const token = signToken(user);
+
+      return { token };
     },
     login: async (parent, { email, password }) => {
-      const loginUser = await User.findOne({ email });
-      const token = signToken(loginUser);
-      return { token, loginUser };
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        throw AuthenticationError;
+      }
+
+      const correctPw = await User.isCorrectPassword(password);
+
+      if (!correctPw) {
+        throw AuthenticationError;
+      }
+
+      const token = signToken(user);
+
+      return { token };
     },
     // include CONTEXT on the SAVE and REMOVE Mutations //
     removeBook: async (parent, { bookId }, context) => {
