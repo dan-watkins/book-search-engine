@@ -2,7 +2,6 @@ const { User } = require("../models");
 const { signToken, AuthenticationError } = require("../utils/auth");
 
 const resolvers = {
-  // Include CONTEXT for the me query //
   Query: {
     me: async (parent, args, context) => {
       if (!context.user) {
@@ -40,8 +39,22 @@ const resolvers = {
 
       return { token };
     },
-    // include CONTEXT on the SAVE and REMOVE Mutations //
+    saveBook: async (parent, { bookData }, context) => {
+      if (!context.user) {
+        throw new AuthenticationError();
+      }
+      const updateUser = await User.findOneAndUpdate(
+        { _id: context.user._id },
+        { $addToSet: { savedBooks: bookData } },
+        { new: true }
+      );
+      return updateUser;
+    },
     removeBook: async (parent, { bookId }, context) => {
+      if (!context.user) {
+        throw new AuthenticationError();
+      }
+
       const removedBook = await User.findOneAndUpdate(
         { _id: context.user._id },
         { $pull: { books: { bookId } } },
