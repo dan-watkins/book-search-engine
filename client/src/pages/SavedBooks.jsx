@@ -1,5 +1,4 @@
 import { Container, Card, Button, Row, Col } from "react-bootstrap";
-
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_ME } from "../utils/queries";
 import { REMOVE_BOOK } from "../utils/mutations";
@@ -26,12 +25,11 @@ const SavedBooks = () => {
 
       removeBookId(bookId);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
-  // if data isn't here yet, say so
-  if (!userDataLength) {
+  if (loading) {
     return <h2>LOADING...</h2>;
   }
 
