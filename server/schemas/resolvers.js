@@ -6,9 +6,7 @@ const resolvers = {
   Query: {
     me: async (parent, args, context) => {
       if (context.user) {
-        const userData = await User.findOne({ _id: context.user._id }).select(
-          "-__v -password"
-        );
+        const userData = await User.findOne({ _id: context.user._id });
 
         return userData;
       }
@@ -20,12 +18,12 @@ const resolvers = {
     login: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
       if (!user) {
-        throw new AuthenticationError("Incorrect login credentials!");
+        throw new AuthenticationError("No user found with that email!");
       }
 
       const correctPW = await user.isCorrectPassword(password);
       if (!correctPW) {
-        throw new AuthenticationError("Incorrect login credentials!");
+        throw new AuthenticationError("Password incorrect, please try again!");
       }
 
       const token = signToken(user);
@@ -38,7 +36,7 @@ const resolvers = {
         const token = signToken(user);
         return { token, user };
       } catch (err) {
-        console.log(err);
+        console.error(err);
         return null;
       }
     },
