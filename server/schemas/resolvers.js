@@ -1,11 +1,18 @@
 const { User } = require("../models");
-const { signToken } = require("../utils/auth");
+const { signToken, AuthenticationError } = require("../utils/auth");
 
 const resolvers = {
+  // Include CONTEXT for the me query //
   Query: {
-    user: async (parent, args) => {
-      const matchedUser = await User.find(args);
+    me: async (parent, args) => {
+      const matchedUser = await User.findById(args.meId).select(
+        "-__v -password"
+      );
       return matchedUser;
+    },
+    user: async (parent, args) => {
+      const allUsers = await User.find();
+      return allUsers;
     },
   },
   Mutation: {
@@ -17,16 +24,17 @@ const resolvers = {
     login: async (parent, { email, password }) => {
       const loginUser = await User.findOne({ email });
       const token = signToken(loginUser);
-      return { token, loginUser};
+      return { token, loginUser };
     },
-    saveBook: async (parent, { books }, context) => {
-      const userBook = await User.findOneAndUpdate({ _id: context.user._id }, {$addToSet: { savedBooks: books }}, { new: true });
-      return userBook;
-    },
+    // include CONTEXT on the SAVE and REMOVE Mutations //
     removeBook: async (parent, { bookId }, context) => {
-      const removedBook = await User.findOneAndUpdate({ _id: context.user._id}, {$pull: { books: { bookId }}}, { new: true });
+      const removedBook = await User.findOneAndUpdate(
+        { _id: context.user._id },
+        { $pull: { books: { bookId } } },
+        { new: true }
+      );
       return removedBook;
-    }
+    },
   },
 };
 
