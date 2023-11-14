@@ -1,4 +1,3 @@
-//No Changes//
 const mongoose = require("mongoose");
 
 mongoose.connect(
