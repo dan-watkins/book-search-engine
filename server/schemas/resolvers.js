@@ -1,4 +1,4 @@
-const { AuthenticationError } = require("@apollo/server");
+const { GraphQLError } = require("graphql");
 const { User } = require("../models");
 const { signToken } = require("../utils/auth");
 
@@ -10,7 +10,7 @@ const resolvers = {
 
         return userData;
       }
-      throw new AuthenticationError("You must be logged in!");
+      throw new GraphQLError("You must be logged in!");
     },
   },
 
@@ -18,12 +18,12 @@ const resolvers = {
     login: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
       if (!user) {
-        throw new AuthenticationError("No user found with that email!");
+        throw new GraphQLError("No user found with that email!");
       }
 
       const correctPW = await user.isCorrectPassword(password);
       if (!correctPW) {
-        throw new AuthenticationError("Password incorrect, please try again!");
+        throw new GraphQLError("Password incorrect, please try again!");
       }
 
       const token = signToken(user);
@@ -50,7 +50,7 @@ const resolvers = {
         );
         return updatedUser;
       }
-      throw new AuthenticationError("You must be logged in to save books!");
+      throw new GraphQLError("You must be logged in to save books!");
     },
 
     removeBook: async (parent, { bookId }, context) => {
@@ -62,7 +62,7 @@ const resolvers = {
         );
         return updatedUser;
       }
-      throw new AuthenticationError("You must be logged in to delete books!");
+      throw new GraphQLError("You must be logged in to delete books!");
     },
   },
 };
